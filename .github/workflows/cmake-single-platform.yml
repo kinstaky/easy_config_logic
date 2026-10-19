@@ -5,8 +5,6 @@ name: CMake on a single platform
 on:
   push:
     branches: [ "master", "dev" ]
-  pull_request:
-    branches: [ "master" ]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -14,13 +12,14 @@ env:
 
 jobs:
   build:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v4
     - name: Install Dependency Packages
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential autoconf libtool pkg-config ninja-build g++-multilib linux-libc-dev-i386-cross
+        sudo apt-get install -y build-essential cmake autoconf libtool pkg-config ninja-build g++-multilib linux-libc-dev-i386-cross
     - name: Download gRPC
       run: |
         mkdir -p dep/grpc
@@ -54,6 +53,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
   build-dev:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
@@ -68,7 +68,7 @@ jobs:
     - name: Install Dependency Packages
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential autoconf libtool pkg-config ninja-build g++-multilib linux-libc-dev-i386-cross
+        sudo apt-get install -y build-essential cmake autoconf libtool pkg-config ninja-build g++-multilib linux-libc-dev-i386-cross
     - name: Download gRPC
       run: |
         mkdir -p dep/grpc
