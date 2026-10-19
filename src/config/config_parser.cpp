@@ -52,7 +52,7 @@ void ConfigParser::Clear() noexcept {
 	front_out_use_ = 0;
 	front_in_use_ = 0;
 	front_use_lemo_ = 0;
-	front_output_inverse_ = 0;
+	front_input_inverse_ = 0;
 	back_output_ = size_t(-1);
 	extern_clock_ = size_t(-1);
 	for (int i = 0; i < 4; ++i) gates_[i].clear();
@@ -176,8 +176,10 @@ ParseResult ConfigParser::Parse(const std::string &expr) noexcept {
 	bool is_scaler = IsScaler(left_name);
 	if (tree.Root()->OperatorType() == kOperatorNull) {
 		if (tree.Root()->Leaf(0)) {
+			// number literal 0
 			generate_index = kZeroValueOffset;
 		} else if (tree.Root()->Leaf(1)) {
+			// number literal 1
 			generate_index = kZeroValueOffset;
 		} else {
 			generate_index = GenerateGate(&tree, tree.Root(), 0, is_scaler);
@@ -202,12 +204,13 @@ ParseResult ConfigParser::Parse(const std::string &expr) noexcept {
 		front_outputs_.push_back(PortSource{left_index, size_t(generate_index)});
 		front_out_use_.set(left_index);
 		if (!IsClock(tokens[2]->Name())) {
-			front_output_inverse_.set(left_index);
+			front_input_inverse_.set(left_index);
 			if (
 				tree.Root()->Leaf(1)
 				&& tree.Root()->OperatorType() == kOperatorNull
 			) {
-				front_output_inverse_.reset(left_index);
+				// number literal 1
+				front_input_inverse_.reset(left_index);
 			}
 		}
 		if (IsLemoIo(left_name)) {
@@ -775,10 +778,10 @@ std::string ConfigParser::SaveConfigInformation(bool expression) const noexcept 
 	// create directories if not existed
 	std::string path = std::string(getenv("HOME")) + "/.easy-config-logic";
 #if __cplusplus >= 201703L
-	std::filesystem::create_directories(path);
+	// std::filesystem::create_directories(path);
 	std::filesystem::create_directories(path+"/backup");
 #else
-	std::experimental::filesystem::create_directories(path);
+	// std::experimental::filesystem::create_directories(path);
 	std::experimental::filesystem::create_directories(path+"/backup");
 #endif
 	// get current time

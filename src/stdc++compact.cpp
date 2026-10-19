@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <sstream>
+#include <memory>
 /* Expose the definitions for the old ABI, allowing us to call its functions */
 #define _GLIBCXX_THREAD_ABI_COMPAT 1
 #include <thread>
